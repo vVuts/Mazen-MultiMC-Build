@@ -1,0 +1,38 @@
+name: Build-Mazen-MultiMC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.2'
+          arch: 'win64_mingw81'
+
+      - name: Set up MinGW
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: 8
+          platform: x64
+
+      - name: CMake Build
+        run: |
+          mkdir build
+          cd build
+          cmake -G "MinGW Makefiles" .. -DMultiMC_LAYOUT=Standalone
+          cmake --build .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Mazen-MultiMC-Exe
+          path: build/launcher/MultiMC.exe
